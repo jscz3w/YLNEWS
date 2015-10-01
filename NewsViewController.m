@@ -8,7 +8,7 @@
 
 #import "NewsViewController.h"
 #import "WebViewController.h"
-#import "SDProgressView.h"
+#import "AFNetworking.h"
 
 @interface NewsViewController ()
 {
@@ -17,11 +17,41 @@
   NSMutableArray *urlArray;//新闻URL
   UIScrollView* helpScrView;
   UIPageControl* pageCtrl;
-  SDRotationLoopProgressView *aProgressLoad;
+  
+  UIActivityIndicatorView *acView;
+  UIImageView * msgView;
+    
+  int iPage ;
+
 }
 @end
 
 @implementation NewsViewController
+
+
+-(void)network_test{
+    
+    /**
+     AFNetworkReachabilityStatusUnknown          = -1,  // 未知
+     AFNetworkReachabilityStatusNotReachable     = 0,   // 无连接
+     AFNetworkReachabilityStatusReachableViaWWAN = 1,   // 3G 花钱
+     AFNetworkReachabilityStatusReachableViaWiFi = 2,   // WiFi
+     */
+    // 如果要检测网络状态的变化,必须用检测管理器的单例的startMonitoring
+    [[AFNetworkReachabilityManager sharedManager] startMonitoring];
+    
+    // 检测网络连接的单例,网络变化时的回调方法
+    [[AFNetworkReachabilityManager sharedManager] setReachabilityStatusChangeBlock:^(AFNetworkReachabilityStatus status) {
+        NSLog(@"%ld", status);
+        if (status ==-1 || status == 0) {
+            [acView stopAnimating];
+            
+        };
+        
+    }];
+
+    
+}
 
 
 - (void)viewDidLoad {
@@ -32,7 +62,7 @@
     CGRect bounds = self.view.frame;  //获取界面区域
     
     
-    //self.navigationItem.title=@"集团要闻";
+    
     UIImage *aBackGround=[UIImage imageNamed:@"background@2x"];
     
     //UIColor *aColor =[UIColor colorWithPatternImage:aBackGround];
@@ -49,13 +79,6 @@
     titleArray =[NSMutableArray array];
     dateArray  =[NSMutableArray array];
     urlArray   =[NSMutableArray array];
-    //descArray  =[NSMutableArray array];
-    
-    aProgressLoad =[[SDRotationLoopProgressView alloc]initWithFrame:CGRectMake((bounds.size.width-bounds.origin.x)/2-50, bounds.origin.y+300,100, 100)];
-    
-    
-    [self.view addSubview:aProgressLoad];
-    
    
     
     //集团要闻
@@ -67,7 +90,7 @@
     UIImage * initImages= [UIImage imageNamed:@"jtTOP@2x"];
     
     
-    UIImageView * imgView =[[UIImageView alloc]initWithFrame:CGRectMake(bounds.origin.x, bounds.origin.y, bounds.size.width, 170)];
+    UIImageView * imgView =[[UIImageView alloc]initWithFrame:CGRectMake(bounds.origin.x, bounds.origin.y, bounds.size.width, 130)];
     //imgView.contentMode=UIViewContentModeCenter;
     
     [imgView setImage:initImages];
@@ -77,7 +100,7 @@
     UIImage * initImages2= [UIImage imageNamed:@"jcTOP@2x"];
     
     
-    UIImageView * imgView2 =[[UIImageView alloc]initWithFrame:CGRectMake(bounds.origin.x, bounds.origin.y, bounds.size.width, 170)];
+    UIImageView * imgView2 =[[UIImageView alloc]initWithFrame:CGRectMake(bounds.origin.x, bounds.origin.y, bounds.size.width, 130)];
     //    imgView2.contentMode=UIViewContentModeCenter;
     [imgView2 setImage:initImages2];
     
@@ -91,13 +114,13 @@
     UIImage * initImages3= [UIImage imageNamed:@"ldTOP@2x"];
     
     
-    UIImageView * imgView3 =[[UIImageView alloc]initWithFrame:CGRectMake(bounds.origin.x, bounds.origin.y, bounds.size.width, 150)];
+    UIImageView * imgView3 =[[UIImageView alloc]initWithFrame:CGRectMake(bounds.origin.x, bounds.origin.y, bounds.size.width, 130)];
     //    imgView2.contentMode=UIViewContentModeCenter;
     [imgView3 setImage:initImages3];
     
     
     //创建UIScrollView
-    helpScrView = [[UIScrollView alloc] initWithFrame:CGRectMake(bounds.origin.x, bounds.origin.y, bounds.size.width, 170)];  //创建UIScrollView，位置大小与主界面一样。
+    helpScrView = [[UIScrollView alloc] initWithFrame:CGRectMake(bounds.origin.x, bounds.origin.y, bounds.size.width, 130)];  //创建UIScrollView，位置大小与主界面一样。
     [helpScrView setContentSize:CGSizeMake(bounds.size.width * 3, 0)];  //设置全部内容的尺寸，这里帮助图片是2张，所以宽度设为界面宽度*2  ，高度和界面一致。
     helpScrView.pagingEnabled = YES;//设为YES时，会按页滑动
     helpScrView.bounces = NO;//取消UIScrollView的弹性属性，这个可以按个人喜好来定
@@ -113,7 +136,7 @@
     
     
     //创建UIPageControl
-    pageCtrl = [[UIPageControl alloc] initWithFrame:CGRectMake(0, bounds.origin.y+150, bounds.size.width, 30)];  //创建UIPageControl，位置在屏幕最下方。
+    pageCtrl = [[UIPageControl alloc] initWithFrame:CGRectMake(0, bounds.origin.y+100, bounds.size.width, 30)];  //创建UIPageControl，位置在屏幕最下方。
     pageCtrl.numberOfPages = 3;//总的图片页数
     pageCtrl.currentPage = 0;//当前页
     [pageCtrl addTarget:self action:@selector(pageTurn:) forControlEvents:UIControlEventValueChanged];  //用户点击UIPageControl的响应函数
@@ -121,7 +144,19 @@
     
     [self.view addSubview:pageCtrl];  //将UIPageControl添加到主界面上。
     
-
+    
+    acView =[[UIActivityIndicatorView alloc]initWithFrame:CGRectMake((bounds.size.width-bounds.origin.x)/2-50, bounds.origin.y+50,120, 120)];
+    
+    [acView setCenter:CGPointMake(35, 80)];//指定进度轮中心点
+    
+    [acView setActivityIndicatorViewStyle:UIActivityIndicatorViewStyleWhiteLarge];//设置进度轮显示类型
+    
+    
+    
+    [self.view addSubview:acView];
+    [acView startAnimating];
+    
+    
     
 }
 - (void)loadScrollViewWithPage:(UIView *)page
@@ -139,12 +174,23 @@
 
 {
     
+    
+    
+    
     //更新UIPageControl的当前页
     CGPoint offset = scrollView.contentOffset;
     CGRect bounds = scrollView.frame;
 //    NSLog(@"scrollViewDidEndDecelerating");
+    
+ //   NSLog(@"offset.x =%f bounds.size.width = %f",offset.x , bounds.size.width);
+//    [pageCtrl setCurrentPage:offset.x / bounds.size.width];
+    
+    
     [pageCtrl setCurrentPage:offset.x / bounds.size.width];
-     //[aProgressLoad setNeedsDisplay];
+    
+    //NSLog(@"PAGE %ld",pageCtrl.currentPage);
+    
+    
     if(pageCtrl.currentPage==0)
     {
         [self loadNews:@"http://www.shenhuagroup.com.cn/cs/sh/RSSINFO?siteName=siteName:shenhua,siteColumnId:1382682123408"];
@@ -163,13 +209,20 @@
         //self.navigationItem.title=@"领导新闻";
 
     }
-    [aProgressLoad dismiss];
+    
     
 }
+
+//- (void)scrollViewDidScroll:(UIScrollView *)scrollView
+//{
+//    
+//    NSLog(@"AAAA");
+//}
+
 - (void)pageTurn:(UIPageControl*)sender
 
 {
-    //    NSLog(@"FUNC %@",__FUNCTION__);
+    
     
     //NSLog(@"pageTurn");
     //令UIScrollView做出相应的滑动显示
@@ -191,8 +244,8 @@
 -(NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
     
-    if([titleArray count]>=8)
-        return 8 ;
+    if([titleArray count]>=9)
+        return 9 ;
     else
         return [titleArray count];
 }
@@ -221,20 +274,43 @@
 -(void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
     //    NSLog(@"Section = %ld, Row = %ld",indexPath.section+1,indexPath.row+1);
-    NSMutableString * baseURL=[[NSMutableString alloc]init];
-    [baseURL appendString:@"http://www.shenhuagroup.com.cn"];
-    [baseURL appendString:[[urlArray objectAtIndex:indexPath.row] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]]];
     
-   // NSLog(@"%@",baseURL);
     
-    WebViewController * newsWeb = [[WebViewController alloc]init];
-    [newsWeb showViewUrlValue:baseURL];
+    // 如果要检测网络状态的变化,必须用检测管理器的单例的startMonitoring
+    [[AFNetworkReachabilityManager sharedManager] startMonitoring];
     
-    UINavigationController * LoginNC =  [[UINavigationController alloc]initWithRootViewController:newsWeb];
+    // 检测网络连接的单例,网络变化时的回调方法
+    [[AFNetworkReachabilityManager sharedManager] setReachabilityStatusChangeBlock:^(AFNetworkReachabilityStatus status) {
+        //NSLog(@"%ld", status);
+        if (status ==-1 || status == 0) {
+            [acView stopAnimating];
+            
+            [self loadMsgImg:@"msg@2x"];
+            
+            
+        }
+        else{
+            NSMutableString * baseURL=[[NSMutableString alloc]init];
+            [baseURL appendString:@"http://www.shenhuagroup.com.cn"];
+            [baseURL appendString:[[urlArray objectAtIndex:indexPath.row] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]]];
+            
+            // NSLog(@"%@",baseURL);
+            
+            WebViewController * newsWeb = [[WebViewController alloc]init];
+            [newsWeb showViewUrlValue:baseURL];
+            
+            UINavigationController * LoginNC =  [[UINavigationController alloc]initWithRootViewController:newsWeb];
+            
+            [self presentViewController:LoginNC animated:YES completion:^{
+                NSLog(@"Read News....");
+            }];
+        }
     
-    [self presentViewController:LoginNC animated:YES completion:^{
-        NSLog(@"Read News....");
     }];
+    
+    
+    
+   
     
 }
 - (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
@@ -250,31 +326,96 @@
 
 -(void)loadNews:(NSString *)url
 {
-    //NSLog(@"Load News");
     
     
-    // [aProgressLoad setNeedsDisplay];
     
-    NSURLRequest * request=[NSURLRequest requestWithURL:[NSURL URLWithString:url] cachePolicy:NSURLRequestReloadIgnoringLocalCacheData  timeoutInterval:40.0];
-    
-    NSURLConnection *connection=[[NSURLConnection alloc] initWithRequest:request delegate:self];
+     [acView startAnimating];
     
     
-    if (connection) {
-//        NSLog(@"The connection 成功");
+    
+    /**
+     AFNetworkReachabilityStatusUnknown          = -1,  // 未知
+     AFNetworkReachabilityStatusNotReachable     = 0,   // 无连接
+     AFNetworkReachabilityStatusReachableViaWWAN = 1,   // 3G 花钱
+     AFNetworkReachabilityStatusReachableViaWiFi = 2,   // WiFi
+     */
+    // 如果要检测网络状态的变化,必须用检测管理器的单例的startMonitoring
+    [[AFNetworkReachabilityManager sharedManager] startMonitoring];
+    
+    // 检测网络连接的单例,网络变化时的回调方法
+    [[AFNetworkReachabilityManager sharedManager] setReachabilityStatusChangeBlock:^(AFNetworkReachabilityStatus status) {
+        //NSLog(@"%ld", status);
+        if (status ==-1 || status == 0) {
+            [acView stopAnimating];
+            
+            [self loadMsgImg:@"msg@2x"];
+            
+            
+        }
+        else{
+            NSURLRequest * request=[NSURLRequest requestWithURL:[NSURL URLWithString:url] cachePolicy:NSURLRequestReloadIgnoringLocalCacheData  timeoutInterval:40.0];
+            
+            NSURLConnection *connection=[[NSURLConnection alloc] initWithRequest:request delegate:self];
+            
+            
+            if (connection) {
+                
+                
+                self.responseData=[NSMutableData data];
+                
+            }
+            else
+            {
+                //NSLog(@"The connection failed");
+                [self loadMsgImg:@"error@2x"];
+            }
+
+        }
         
-        self.responseData=[NSMutableData data];
-        
-    }
-    else
-    {
-        NSLog(@"The connection failed");
-    }
+    }];
+
     
     
     
     
     
+    
+    
+    
+    
+    
+}
+-(void)loadMsgImg:(NSString * )imgName {
+    CGRect bounds = self.view.bounds;
+    UIImage * msgImg =[UIImage imageNamed:imgName];
+    msgView =[[UIImageView alloc]initWithFrame:CGRectMake((bounds.size.width-bounds.origin.x)/2-110, 200, 220, 60)];
+    
+    msgView.image=msgImg;
+    
+    [self.view addSubview:msgView];
+    
+    CABasicAnimation *animation = [CABasicAnimation animationWithKeyPath:@"opacity"];//必须写opacity才行。
+    animation.fromValue = [NSNumber numberWithFloat:1.0f];
+    animation.toValue = [NSNumber numberWithFloat:0.0f];//这是透明度。
+    animation.autoreverses = YES;
+    animation.duration = 1.0;
+    animation.repeatCount = MAXFLOAT;
+    animation.removedOnCompletion = NO;
+    animation.fillMode = kCAFillModeForwards;
+    animation.timingFunction=[CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseIn];///没有的话是均匀的动画。
+    
+    
+    [msgView.layer addAnimation:animation forKey:@"opacity"];
+    
+    
+    [NSTimer scheduledTimerWithTimeInterval:2.0 target:self selector:@selector(hidePic) userInfo:nil repeats:NO];
+
+}
+
+-(void)hidePic{
+    
+    [msgView removeFromSuperview];
+    //return ;
     
 }
 - (void)didReceiveMemoryWarning {
@@ -315,15 +456,14 @@
 
 - (void)connectionDidFinishLoading:(NSURLConnection *)connection
 {
-    //NSLog(@"connectionDidFinishLoading:");
-    // NSString *responseString =[[NSString alloc]initWithData:self.responseData encoding:NSUTF8StringEncoding];
-    // NSLog(@"Response String :\n%@",responseString);
+    
     [self parserXML];
 }
 - (void)connection:(NSURLConnection *)connection didFailWithError:(NSError *)error
 {
     //NSLog(@"connection:didFailWithError:");
-    NSLog(@"%@",[error localizedDescription]);
+    //NSLog(@"%@",[error localizedDescription]);
+    [self loadMsgImg:@"error@2x"];
     
 }
 
@@ -334,7 +474,8 @@
     [xmlParser setDelegate:self];
     
     if (![xmlParser parse]) {
-        NSLog(@"Parser Error");
+        //NSLog(@"Parser Error");
+        [self loadMsgImg:@"error@2x"];
     }
     
 }
@@ -363,29 +504,15 @@
         
         CGRect bounds = self.view.frame;  //获取界面区域
         
-        UITableView * newsTableView =[[UITableView alloc]initWithFrame:CGRectMake(bounds.origin.x, bounds.origin.y+170, bounds.size.width, bounds.size.height-40) style:UITableViewStylePlain];
+        UITableView * newsTableView =[[UITableView alloc]initWithFrame:CGRectMake(bounds.origin.x, bounds.origin.y+130, bounds.size.width, bounds.size.height-40) style:UITableViewStylePlain];
         newsTableView.delegate=self;
         newsTableView.dataSource=self;
-        
+        newsTableView.scrollEnabled=NO;
         [self.view addSubview:newsTableView];
         
-        
-//        UIActivityIndicatorView *acView =[[UIActivityIndicatorView alloc]initWithFrame:CGRectMake((bounds.size.width-bounds.origin.x)/2-50, bounds.origin.y+50,100, 100)];
-//        
-//        [acView setCenter:CGPointMake(160, 140)];//指定进度轮中心点
-//        
-//        [acView setActivityIndicatorViewStyle:UIActivityIndicatorViewStyleWhiteLarge];//设置进度轮显示类型
-//        
-//        
-//        [acView startAnimating];
-//        [newsTableView addSubview:acView];
+        [acView stopAnimating];
         
         
-        
-//        SDPieProgressView * aPie = [[SDPieProgressView alloc]initWithFrame:CGRectMake((bounds.size.width-bounds.origin.x)/2-50, bounds.origin.y+100,100, 100)];
-//        [newsTableView addSubview:aProgressLoad];
-//        
-//        [aProgressLoad dismiss];
     }
 }
 
@@ -459,6 +586,38 @@
     }
 }
 
+
+//- (void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath
+//{
+//    NSLog(@"点击了删除");
+//    if (editingStyle == UITableViewCellEditingStyleDelete) {
+//                [tableView deleteRowsAtIndexPaths:[NSArray arrayWithObject:indexPath] withRowAnimation:UITableViewRowAnimationFade];
+//    }
+//    else if (editingStyle == UITableViewCellEditingStyleInsert) {
+//        // Create a new instance of the appropriate class, insert it into the array, and add a new row to the table view
+//    }
+//}
+//-(UITableViewCellEditingStyle)tableView:(UITableView *)tableView editingStyleForRowAtIndexPath:(NSIndexPath *)indexPath
+//{
+//    NSLog(@"手指撮动了");
+//    return UITableViewCellEditingStyleDelete;
+//}
+//-(NSString *)tableView:(UITableView *)tableView titleForDeleteConfirmationButtonForRowAtIndexPath:(NSIndexPath *)indexPath
+//{
+//    return  @"删除";
+//}
+//
+//-(BOOL)tableView:(UITableView *)tableView canEditRowAtIndexPath:(NSIndexPath *)indexPath
+//{
+//    return YES;
+//}
+//- (BOOL)tableView:(UITableView *)tableView canMoveRowAtIndexPath:(NSIndexPath *)indexPath {
+//    return YES;
+//}
+//- (void)tableView:(UITableView *)tableView moveRowAtIndexPath:(NSIndexPath *)fromIndexPath toIndexPath:(NSIndexPath *)toIndexPath {
+//    
+//}
+//
 
 
 

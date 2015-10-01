@@ -8,8 +8,11 @@
 
 #import "RootViewController.h"
 #import "WebViewController.h"
+#import "AFNetworking.h"
 @interface RootViewController ()
-
+{
+    UIImageView * msgView ;
+}
 @end
 
 @implementation RootViewController
@@ -39,6 +42,22 @@
     urlTableView.dataSource=self;
     
     [self.view addSubview:urlTableView];
+    
+    
+    // 如果要检测网络状态的变化,必须用检测管理器的单例的startMonitoring
+    [[AFNetworkReachabilityManager sharedManager] startMonitoring];
+    
+    // 检测网络连接的单例,网络变化时的回调方法
+    [[AFNetworkReachabilityManager sharedManager] setReachabilityStatusChangeBlock:^(AFNetworkReachabilityStatus status) {
+        //NSLog(@"%ld", status);
+        if (status ==-1 || status == 0) {
+            
+            [self loadMsgImg:@"msg@2x"];
+            msgView.hidden=NO;
+            
+            
+            
+        }}];
 
 }
 
@@ -113,39 +132,84 @@
     return cell;
     
 }
+-(void)loadMsgImg:(NSString * )imgName {
+    CGRect bounds = self.view.bounds;
+    UIImage * msgImg =[UIImage imageNamed:imgName];
+    msgView =[[UIImageView alloc]initWithFrame:CGRectMake((bounds.size.width-bounds.origin.x)/2-110, 400, 220, 60)];
+    
+    msgView.image=msgImg;
+    
+    [self.view addSubview:msgView];
+    CABasicAnimation *animation = [CABasicAnimation animationWithKeyPath:@"opacity"];//必须写opacity才行。
+    animation.fromValue = [NSNumber numberWithFloat:1.0f];
+    animation.toValue = [NSNumber numberWithFloat:0.0f];//这是透明度。
+    animation.autoreverses = YES;
+    animation.duration = 1.0;
+    animation.repeatCount = MAXFLOAT;
+    animation.removedOnCompletion = NO;
+    animation.fillMode = kCAFillModeForwards;
+    animation.timingFunction=[CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseIn];///没有的话是均匀的动画。
+    
+    
+    [msgView.layer addAnimation:animation forKey:@"opacity"];
+    
+    
+    [NSTimer scheduledTimerWithTimeInterval:2.0 target:self selector:@selector(hidePic) userInfo:nil repeats:NO];
+    
+}
+
+-(void)hidePic{
+    
+    [msgView removeFromSuperview];
+    //return ;
+    
+}
+
 //选择行
 -(void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
     if (indexPath.section==0) {
         
+        // 如果要检测网络状态的变化,必须用检测管理器的单例的startMonitoring
+        [[AFNetworkReachabilityManager sharedManager] startMonitoring];
         
-//        WebViewController * login = [[WebViewController alloc]init];
-//        [login showViewUrlValue:@"http://www.shenhuagroup.com.cn"];
-//        
-//        UINavigationController * LoginNC =  [[UINavigationController alloc]initWithRootViewController:login];
-//    
-//        [self.navigationController presentViewController:LoginNC animated:YES completion:^{
-//            NSLog(@"login....");
-//        }];
-        if (indexPath.row==0) {
-            //亿利电厂MIS
-        NSURL* MISurl = [[ NSURL alloc ] initWithString :@"http://10.229.128.25:8080/mis"];
-        [[UIApplication sharedApplication ] openURL:MISurl];
-         
-         }
-        if (indexPath.row==1) {
-            //亿利电厂主页
-            NSURL* MISurl = [[ NSURL alloc ] initWithString :@"http://10.229.128.8"];
-            [[UIApplication sharedApplication ] openURL:MISurl];
-            
-        }
+        // 检测网络连接的单例,网络变化时的回调方法
+        [[AFNetworkReachabilityManager sharedManager] setReachabilityStatusChangeBlock:^(AFNetworkReachabilityStatus status) {
+            //NSLog(@"AAAA %ld", status);
+            if (status ==-1 || status == 0) {
+                
+                  [self loadMsgImg:@"msg@2x"];
+                   msgView.hidden=NO;
 
-        if (indexPath.row==2) {
-            //神华邮箱
-            NSURL* MISurl = [[ NSURL alloc ] initWithString :@"http://portalwg.shenhua.cc/oimdiy/login.jsp?appname=webcenter"];
-            [[UIApplication sharedApplication ] openURL:MISurl];
-            
-        }
+                
+                
+            }else{
+                msgView.hidden=YES;
+                if (indexPath.row==0) {
+                    //亿利电厂MIS
+                    NSURL* MISurl = [[ NSURL alloc ] initWithString :@"http://10.229.128.25:8080/mis"];
+                    [[UIApplication sharedApplication ] openURL:MISurl];
+                    
+                }
+                if (indexPath.row==1) {
+                    //亿利电厂主页
+                    NSURL* MISurl = [[ NSURL alloc ] initWithString :@"http://10.229.128.8"];
+                    [[UIApplication sharedApplication ] openURL:MISurl];
+                    
+                }
+                
+                if (indexPath.row==2) {
+                    //神华邮箱
+                    NSURL* MISurl = [[ NSURL alloc ] initWithString :@"http://portalwg.shenhua.cc/oimdiy/login.jsp?appname=webcenter"];
+                    [[UIApplication sharedApplication ] openURL:MISurl];
+                    
+                }
+
+            }
+        }];
+
+        
+
         
     }
 }
