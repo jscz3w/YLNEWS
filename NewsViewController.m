@@ -194,6 +194,7 @@
     if(pageCtrl.currentPage==0)
     {
         [self loadNews:@"http://www.shenhuagroup.com.cn/cs/sh/RSSINFO?siteName=siteName:shenhua,siteColumnId:1382682123408"];
+        //[self loadNews:@"http://www.shenhuagroup.com.cn/cs/sh/RSSINFO?siteName=siteName:shenhua,siteColumnId:1382685260394"];
         //self.navigationItem.title=@"集团要闻";
 
     }
