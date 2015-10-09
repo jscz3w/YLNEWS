@@ -1,4 +1,5 @@
 PODS:
+  - ABSQLite (1.2.0)
   - AFNetworking (2.6.0):
     - AFNetworking/NSURLConnection (= 2.6.0)
     - AFNetworking/NSURLSession (= 2.6.0)
@@ -22,9 +23,11 @@ PODS:
     - AFNetworking/NSURLSession
 
 DEPENDENCIES:
+  - ABSQLite (~> 1.2.0)
   - AFNetworking (~> 2.6.0)
 
 SPEC CHECKSUMS:
+  ABSQLite: f1becd1b3c99a2ff3a1023eda7bf79d799a53ef4
   AFNetworking: 79f7eb1a0fcfa7beb409332b2ca49afe9ce53b05
 
-COCOAPODS: 0.38.0
+COCOAPODS: 0.38.2

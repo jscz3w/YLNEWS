@@ -14,9 +14,9 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "F7ED7C10A3F0060433AFCC35"
-               BuildableName = "libPods-亿利MIS.a"
-               BlueprintName = "Pods-亿利MIS"
+               BlueprintIdentifier = "981DF9B170D3FFA63F9EE2B3"
+               BuildableName = "libABSQLite.a"
+               BlueprintName = "ABSQLite"
                ReferencedContainer = "container:Pods.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>

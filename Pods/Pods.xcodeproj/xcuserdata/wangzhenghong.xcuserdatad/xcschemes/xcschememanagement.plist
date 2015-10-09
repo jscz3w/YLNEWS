@@ -4,6 +4,11 @@
 <dict>
 	<key>SchemeUserState</key>
 	<dict>
+		<key>ABSQLite.xcscheme</key>
+		<dict>
+			<key>isShown</key>
+			<false/>
+		</dict>
 		<key>AFNetworking.xcscheme</key>
 		<dict>
 			<key>isShown</key>
@@ -17,12 +22,17 @@
 	</dict>
 	<key>SuppressBuildableAutocreation</key>
 	<dict>
-		<key>1B4A057D70433AA6CCFA11EA692C0734</key>
+		<key>19EF66754B2F7354D81F8021D6F1862D</key>
 		<dict>
 			<key>primary</key>
 			<true/>
 		</dict>
-		<key>A1ADB270E0933423B817719D90BFCA71</key>
+		<key>4AAB317A6D7FC5688722DF2D1E9468D0</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>71D990964DF351BE45371CD95DA31DD3</key>
 		<dict>
 			<key>primary</key>
 			<true/>
